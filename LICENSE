@@ -19,15 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----------------------------------------------------------------------------
-
-This license covers the source code (src/, original_code/, reproduce.py) and
-the data files (data/).
-
-It does NOT cover the thesis documents in thesis/ (the PDF, the presentation
-and the figures). These remain under the author's copyright as stated in the
-thesis: reproduction, storage and distribution are permitted for
-non-commercial, educational or research purposes, provided the source is
-cited and this notice is retained. Commercial use requires the author's
-permission.
