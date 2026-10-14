@@ -14,37 +14,54 @@ platform can use to clear the market.
 
 ## Quick start
 
+Requires Python 3.12 (3.10+ should work). Clone the repository, then from its folder:
+
+**Windows (PowerShell or cmd)**
+
 ```bash
-python -m venv .venv
-.venv\Scripts\activate            # Windows  (source .venv/bin/activate on Linux/macOS)
-pip install -r requirements.txt
-set PYTHONPATH=src                # export PYTHONPATH=src on Linux/macOS
-python -m thesis_p2p.reproduce
+py -m venv .venv
+.venv\Scripts\python -m pip install -r requirements.txt
+.venv\Scripts\python reproduce.py
 ```
 
-Everything is written to `results/` (figures, CSV tables and `summary.json`). A full run takes a few
-minutes. The free HiGHS solver is used; the thesis used Gurobi, which gives the same optima
-(pass `solver="gurobi"` to the model functions if you have a licence).
+**Linux / macOS**
 
-| Option | Effect |
-|---|---|
-| `--only 6.4` / `6.5` / `6.6` / `6.7` | rebuild one section |
-| `--fresh-scenarios --seed N` | draw new SARIMA scenarios instead of the saved thesis ones |
-| `--grid-search` | rerun the AIC search over SARIMA orders (slow) |
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python reproduce.py
+```
+
+Everything is written to `results/` (figures and Excel tables). A full run takes about 5 minutes.
+`reproduce.py` simply runs the three scripts below in order; each can also be run on its own
+(e.g. in Spyder, cell by cell):
+
+| Script | Thesis section | What it does |
+|---|---|---|
+| `src/Deterministic_Executive.py` | 6.4 | battery dispatch with known load and prices, daily cost with/without battery |
+| `src/Scenarios.py` | 6.5 | SARIMA(3,0,1)x(2,1,1,24) forecast of the next day and load scenarios |
+| `src/Executive.py` | 6.6–6.7 | stochastic model for every t₀, initial charge and tariff → MUFs; realization comparison |
+
+The model functions live in `src/Determenistic_Model_Generator.py` and
+`src/Stohastic_Model_Generator.py`, and the plots in `src/Plots.py`.
+
+> **Windows tips.** Use `py` rather than `python`: on many PCs `python` opens the Microsoft Store
+> instead. If `pip install` fails with *"No such file or directory … pyomo …"*, the folder path is too
+> long for Windows — clone into a short path such as `C:\thesis` or
+> [enable long paths](https://pip.pypa.io/warnings/enable-long-paths).
+
+The free HiGHS solver is used (installed by pip, no licence needed); the thesis used Gurobi, which
+gives the same optima (pass `solver='gurobi'` to the model functions if you have a licence).
+To rerun the slow AIC search over SARIMA orders, set `RUN_GRID_SEARCH = True` in `src/Scenarios.py`.
 
 ## Repository layout
 
 ```
-src/thesis_p2p/
-  deterministic.py   §5.2/§6.4  battery dispatch with known load and prices
-  forecasting.py     §6.5       SARIMA(3,0,1)x(2,1,1,24) forecast and Monte Carlo scenarios
-  stochastic.py      §5.3/§6.6  two-stage stochastic MILP and MUF construction
-  plots.py                      figures in the style of Chapter 6
-  reproduce.py                  rebuilds every Chapter 6 result
+src/                 the thesis scripts, with only the fixes needed to run and reproduce the results
+original_code/       the recovered scripts, unmodified (compare with src/ to see every change)
 data/raw/            inputs: 24 h prices/load, 2018 load history (Jan–Mar), stochastic demo data
 data/thesis_runs/    the exact prices, scenarios and realization files the thesis figures were made from
 thesis/              thesis PDF, presentation, flowchart, and the original figures (thesis/figures/)
-original_code/       the recovered scripts, unmodified
 results/             output of the reproduction (committed so it can be browsed)
 ```
 
@@ -62,8 +79,9 @@ See [REPRODUCTION.md](REPRODUCTION.md) for the figure-by-figure comparison.
 ## Model conventions recovered from the thesis runs
 
 The surviving code is a snapshot from about a month before the final version
-(`original_code/1_README.txt`). The missing pieces were reconstructed from Chapter 5 and pinned down
-by matching the saved thesis outputs:
+(`original_code/1_README.txt`). `src/` keeps that code and its structure, and changes only what is
+needed; the missing pieces were reconstructed from Chapter 5 and pinned down by matching the saved
+thesis outputs. Run `git diff --no-index original_code src` to see every change.
 
 - **Prices are in €/kWh.** Grid buy price λ_tb = 1.15·MCP, grid sell price λ_ts = 0.85·MCP
   (the old code used ±30 €/MWh). Future P2P prices equal the MCP.
@@ -74,7 +92,16 @@ by matching the saved thesis outputs:
   original code (`C[last] = C_initial + discharge[last]`). The thesis' eq. 5.11 (C_end = C_initial)
   gives costs about 0.01 € lower; the code's rule reproduces the saved values exactly.
 - **Big-M:** the original `1e27` constants made the solver accept binaries of 0.999999999,
-  which leaves ~1e17 kWh of slack and an unbounded-looking result. A big-M of ten times the largest
-  physical flow is used instead.
+  which leaves ~1e17 kWh of slack and an unbounded-looking result. A big-M of 1000 kWh is used
+  instead, and imported/exported energy are kept non-negative.
+- **Scenarios:** the stochastic model takes the SARIMA scenarios as input (the old version drew its
+  own Gaussian noise). The thesis' scenario sets are saved in `data/thesis_runs/` and used by
+  `Executive.py`; `Scenarios.py` can draw new ones.
 - **Forecast day:** the realization is the load of **2018-03-03**; the SARIMA model is trained on the
   history up to 2018-03-02 23:00.
+
+## License
+
+The code and data are released under the [MIT License](LICENSE). The thesis documents in `thesis/`
+remain under the author's copyright: non-commercial, educational or research use is permitted with
+attribution (see the thesis copyright page).

@@ -1,6 +1,6 @@
 # Reproduction report
 
-Every Chapter 6 result was rebuilt with `python -m thesis_p2p.reproduce` (HiGHS solver, package
+Every Chapter 6 result was rebuilt with `python reproduce.py` (HiGHS solver, package
 versions in `requirements.txt`) and compared with the figures in the thesis
 (`thesis/figures/`) and the saved thesis run files (`data/thesis_runs/`).
 
@@ -20,17 +20,19 @@ versions in `requirements.txt`) and compared with the figures in the thesis
 
 ## Notes
 
-1. **Fig. 15 counts the battery twice.** The deterministic objective (original code and
-   `deterministic.py`) prices `charge` and `discharge` on top of `bought_power`, which already
+1. **Fig. 15 counts the battery twice.** The deterministic objective in
+   `Determenistic_Model_Generator.py` prices `charge` and `discharge` on top of `bought_power`, which already
    contains them. The 2.90 € plotted in Fig. 15 is that objective value; the actual energy bill with
    the battery is **5.85 €**. The true saving is 2.95 € (34 %), not 5.9 € (67 %). The dispatch
    itself is unaffected (both versions charge in the same cheap hours), so Fig. 14 stands.
-   `results/fig15_cost.png` shows both numbers.
+   `Deterministic_Executive.py` prints both numbers.
 2. **Scenarios are random.** The thesis kept one scenario set per time step (`scenarios_0/4/19.xlsx`)
    and the reproduction uses those. Fig. 37/38 were produced from exactly these files (they match
    to machine precision). Figs. 22–36 show the same behaviour but a few intermediate points differ by
    up to ≈0.5 kWh (e.g. t₀=19, C=7, tariff), which is consistent with those figures having been made
-   from an earlier draw of scenarios that was not saved. `--fresh-scenarios` draws new ones.
+   from an earlier draw of scenarios that was not saved. `Scenarios.py` draws a new set
+   (`results/scenarios_new.xlsx`, shown in `results/scenarios.png`), so Fig. 19 matches in kind
+   but not line by line.
 3. **Not presented in the thesis:** `Realization-forecast costs.xlsx` contains a second block of
    ten rows that does not correspond to the tariff case or to any figure; it is left out.
 4. **Solver:** the thesis used Gurobi; HiGHS reaches the same optimal costs. Where the optimum is
@@ -41,44 +43,44 @@ versions in `requirements.txt`) and compared with the figures in the thesis
 | | Thesis | Reproduced |
 |---|---|---|
 | Fig. 14 dispatch | ![](thesis/figures/fig14_dispatch.png) | ![](results/fig14_dispatch.png) |
-| Fig. 15 cost | ![](thesis/figures/fig15_cost.png) | ![](results/fig15_cost.png) |
+| Fig. 15 cost | ![](thesis/figures/fig15_cost.png) | printed by the script: 8.80 € without battery, 2.90 € objective with battery (actual bill 5.85 €) |
 
 ## Section 6.5 — forecasting
 
 | | Thesis | Reproduced |
 |---|---|---|
-| Fig. 17 diagnostics | ![](thesis/figures/fig17_diagnostics.png) | ![](results/fig17_diagnostics.png) |
-| Fig. 18 forecast | ![](thesis/figures/fig18_forecast.png) | ![](results/fig18_forecast.png) |
-| Fig. 19 scenarios | ![](thesis/figures/fig19_scenarios.png) | ![](results/fig19_scenarios.png) |
+| Fig. 17 diagnostics | ![](thesis/figures/fig17_diagnostics.png) | ![](results/diagnostics.png) |
+| Fig. 18 forecast | ![](thesis/figures/fig18_forecast.png) | ![](results/forecast.png) |
+| Fig. 19 scenarios | ![](thesis/figures/fig19_scenarios.png) | ![](results/scenarios.png) |
 
 ## Section 6.6 — Marginal Utility Functions
 
-Thesis panels: tariff 30 % then no tariff. Reproduced: tariff 30 % left, no tariff right.
-The values are in `results/6.6_muf.csv`.
+Both columns: tariff 30 % first, then no tariff. The values are in `results/MUF_results.xlsx`.
 
 | Case | Thesis | Reproduced |
 |---|---|---|
-| Fig. 22 — t₀=0, C=1 kWh | ![](thesis/figures/muf_t0_0_C_1_tariff30.png) ![](thesis/figures/muf_t0_0_C_1_tariff0.png) | ![](results/muf_t0_0_C_1.png) |
-| Fig. 23 — t₀=0, C=5 kWh | ![](thesis/figures/muf_t0_0_C_5_tariff30.png) ![](thesis/figures/muf_t0_0_C_5_tariff0.png) | ![](results/muf_t0_0_C_5.png) |
-| Fig. 24 — t₀=0, C=7 kWh | ![](thesis/figures/muf_t0_0_C_7_tariff30.png) ![](thesis/figures/muf_t0_0_C_7_tariff0.png) | ![](results/muf_t0_0_C_7.png) |
-| Fig. 25 — t₀=0, C=9 kWh | ![](thesis/figures/muf_t0_0_C_9_tariff30.png) ![](thesis/figures/muf_t0_0_C_9_tariff0.png) | ![](results/muf_t0_0_C_9.png) |
-| Fig. 26 — t₀=0, C=13 kWh | ![](thesis/figures/muf_t0_0_C_13_tariff30.png) ![](thesis/figures/muf_t0_0_C_13_tariff0.png) | ![](results/muf_t0_0_C_13.png) |
-| Fig. 27 — t₀=4, C=1 kWh | ![](thesis/figures/muf_t0_4_C_1_tariff30.png) ![](thesis/figures/muf_t0_4_C_1_tariff0.png) | ![](results/muf_t0_4_C_1.png) |
-| Fig. 28 — t₀=4, C=5 kWh | ![](thesis/figures/muf_t0_4_C_5_tariff30.png) ![](thesis/figures/muf_t0_4_C_5_tariff0.png) | ![](results/muf_t0_4_C_5.png) |
-| Fig. 29 — t₀=4, C=7 kWh | ![](thesis/figures/muf_t0_4_C_7_tariff30.png) ![](thesis/figures/muf_t0_4_C_7_tariff0.png) | ![](results/muf_t0_4_C_7.png) |
-| Fig. 30 — t₀=4, C=9 kWh | ![](thesis/figures/muf_t0_4_C_9_tariff30.png) ![](thesis/figures/muf_t0_4_C_9_tariff0.png) | ![](results/muf_t0_4_C_9.png) |
-| Fig. 31 — t₀=4, C=13 kWh | ![](thesis/figures/muf_t0_4_C_13_tariff30.png) ![](thesis/figures/muf_t0_4_C_13_tariff0.png) | ![](results/muf_t0_4_C_13.png) |
-| Fig. 32 — t₀=19, C=1 kWh | ![](thesis/figures/muf_t0_19_C_1_tariff30.png) ![](thesis/figures/muf_t0_19_C_1_tariff0.png) | ![](results/muf_t0_19_C_1.png) |
-| Fig. 33 — t₀=19, C=5 kWh | ![](thesis/figures/muf_t0_19_C_5_tariff30.png) ![](thesis/figures/muf_t0_19_C_5_tariff0.png) | ![](results/muf_t0_19_C_5.png) |
-| Fig. 34 — t₀=19, C=7 kWh | ![](thesis/figures/muf_t0_19_C_7_tariff30.png) ![](thesis/figures/muf_t0_19_C_7_tariff0.png) | ![](results/muf_t0_19_C_7.png) |
-| Fig. 35 — t₀=19, C=9 kWh | ![](thesis/figures/muf_t0_19_C_9_tariff30.png) ![](thesis/figures/muf_t0_19_C_9_tariff0.png) | ![](results/muf_t0_19_C_9.png) |
-| Fig. 36 — t₀=19, C=13 kWh | ![](thesis/figures/muf_t0_19_C_13_tariff30.png) ![](thesis/figures/muf_t0_19_C_13_tariff0.png) | ![](results/muf_t0_19_C_13.png) |
+| Fig. 22 — t₀=0, C=1 kWh | ![](thesis/figures/muf_t0_0_C_1_tariff30.png) ![](thesis/figures/muf_t0_0_C_1_tariff0.png) | ![](results/MUF_t0_0_C_1_tariff30.png) ![](results/MUF_t0_0_C_1_tariff0.png) |
+| Fig. 23 — t₀=0, C=5 kWh | ![](thesis/figures/muf_t0_0_C_5_tariff30.png) ![](thesis/figures/muf_t0_0_C_5_tariff0.png) | ![](results/MUF_t0_0_C_5_tariff30.png) ![](results/MUF_t0_0_C_5_tariff0.png) |
+| Fig. 24 — t₀=0, C=7 kWh | ![](thesis/figures/muf_t0_0_C_7_tariff30.png) ![](thesis/figures/muf_t0_0_C_7_tariff0.png) | ![](results/MUF_t0_0_C_7_tariff30.png) ![](results/MUF_t0_0_C_7_tariff0.png) |
+| Fig. 25 — t₀=0, C=9 kWh | ![](thesis/figures/muf_t0_0_C_9_tariff30.png) ![](thesis/figures/muf_t0_0_C_9_tariff0.png) | ![](results/MUF_t0_0_C_9_tariff30.png) ![](results/MUF_t0_0_C_9_tariff0.png) |
+| Fig. 26 — t₀=0, C=13 kWh | ![](thesis/figures/muf_t0_0_C_13_tariff30.png) ![](thesis/figures/muf_t0_0_C_13_tariff0.png) | ![](results/MUF_t0_0_C_13_tariff30.png) ![](results/MUF_t0_0_C_13_tariff0.png) |
+| Fig. 27 — t₀=4, C=1 kWh | ![](thesis/figures/muf_t0_4_C_1_tariff30.png) ![](thesis/figures/muf_t0_4_C_1_tariff0.png) | ![](results/MUF_t0_4_C_1_tariff30.png) ![](results/MUF_t0_4_C_1_tariff0.png) |
+| Fig. 28 — t₀=4, C=5 kWh | ![](thesis/figures/muf_t0_4_C_5_tariff30.png) ![](thesis/figures/muf_t0_4_C_5_tariff0.png) | ![](results/MUF_t0_4_C_5_tariff30.png) ![](results/MUF_t0_4_C_5_tariff0.png) |
+| Fig. 29 — t₀=4, C=7 kWh | ![](thesis/figures/muf_t0_4_C_7_tariff30.png) ![](thesis/figures/muf_t0_4_C_7_tariff0.png) | ![](results/MUF_t0_4_C_7_tariff30.png) ![](results/MUF_t0_4_C_7_tariff0.png) |
+| Fig. 30 — t₀=4, C=9 kWh | ![](thesis/figures/muf_t0_4_C_9_tariff30.png) ![](thesis/figures/muf_t0_4_C_9_tariff0.png) | ![](results/MUF_t0_4_C_9_tariff30.png) ![](results/MUF_t0_4_C_9_tariff0.png) |
+| Fig. 31 — t₀=4, C=13 kWh | ![](thesis/figures/muf_t0_4_C_13_tariff30.png) ![](thesis/figures/muf_t0_4_C_13_tariff0.png) | ![](results/MUF_t0_4_C_13_tariff30.png) ![](results/MUF_t0_4_C_13_tariff0.png) |
+| Fig. 32 — t₀=19, C=1 kWh | ![](thesis/figures/muf_t0_19_C_1_tariff30.png) ![](thesis/figures/muf_t0_19_C_1_tariff0.png) | ![](results/MUF_t0_19_C_1_tariff30.png) ![](results/MUF_t0_19_C_1_tariff0.png) |
+| Fig. 33 — t₀=19, C=5 kWh | ![](thesis/figures/muf_t0_19_C_5_tariff30.png) ![](thesis/figures/muf_t0_19_C_5_tariff0.png) | ![](results/MUF_t0_19_C_5_tariff30.png) ![](results/MUF_t0_19_C_5_tariff0.png) |
+| Fig. 34 — t₀=19, C=7 kWh | ![](thesis/figures/muf_t0_19_C_7_tariff30.png) ![](thesis/figures/muf_t0_19_C_7_tariff0.png) | ![](results/MUF_t0_19_C_7_tariff30.png) ![](results/MUF_t0_19_C_7_tariff0.png) |
+| Fig. 35 — t₀=19, C=9 kWh | ![](thesis/figures/muf_t0_19_C_9_tariff30.png) ![](thesis/figures/muf_t0_19_C_9_tariff0.png) | ![](results/MUF_t0_19_C_9_tariff30.png) ![](results/MUF_t0_19_C_9_tariff0.png) |
+| Fig. 36 — t₀=19, C=13 kWh | ![](thesis/figures/muf_t0_19_C_13_tariff30.png) ![](thesis/figures/muf_t0_19_C_13_tariff0.png) | ![](results/MUF_t0_19_C_13_tariff30.png) ![](results/MUF_t0_19_C_13_tariff0.png) |
 
 ## Section 6.7 — realization and model performance
 
 | | Thesis | Reproduced |
 |---|---|---|
-| Fig. 37 | ![](thesis/figures/fig37_realization.png) ![](thesis/figures/fig37_forecast.png) | ![](results/fig37_realization_vs_forecast.png) |
-| Fig. 38 | ![](thesis/figures/fig38_cost_error.png) | ![](results/fig38_cost_error.png) |
+| Fig. 37 | ![](thesis/figures/fig37_realization.png) ![](thesis/figures/fig37_forecast.png) | ![](results/MUF_realization.png) ![](results/MUF_forecast.png) |
+| Fig. 38 | ![](thesis/figures/fig38_cost_error.png) | ![](results/realization_error.png) |
 
-The numbers are in `results/6.7_realization.csv`, next to the saved thesis values.
+The numbers are in `results/Realization-forecast costs.xlsx`; the thesis values are in
+`data/thesis_runs/Realization-forecast costs.xlsx`.
